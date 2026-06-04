@@ -192,7 +192,7 @@ cat > "${WORKDIR}/topic-policy-config.json" <<'JSON'
       "type": "DENY"
     },
     {
-      "name": "competitor-after-sales",
+      "name": "competitor-sales",
       "definition": "The user asks about a competitor brand's after-sales policy, warranty period, repair service, return/exchange policy, or customer service contact information.",
       "examples": [
         "How many years of warranty does a Gree air conditioner have?",
@@ -239,6 +239,9 @@ cat > "${WORKDIR}/word-policy-config.json" <<'JSON'
     {"text": "Braun"}, {"text": "Zojirushi"}, {"text": "Tiger"}, {"text": "Blueair"},
     {"text": "IQAir"}, {"text": "Honeywell"}, {"text": "Bissell"}, {"text": "Shark"},
     {"text": "ORVIBO"}, {"text": "Aqara"}, {"text": "Tuya"}
+  ],
+  "managedWordListsConfig": [
+    {"type": "PROFANITY"}
   ]
 }
 JSON
