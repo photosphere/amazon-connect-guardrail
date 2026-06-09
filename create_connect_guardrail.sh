@@ -144,74 +144,170 @@ cat > "${WORKDIR}/topic-policy-config.json" <<'JSON'
 {
   "topicsConfig": [
     {
-      "name": "competitor-product-inquiry",
-      "definition": "The user asks about or seeks information on non-Midea brand home appliances, including product features, specifications, pricing, purchase channels, usage, or repair/maintenance.",
+      "name": "territorial-sovereignty-disputes",
+      "definition": "Discussions about territorial ownership disputes, sovereignty positions, or status of disputed regions such as Taiwan, South China Sea islands, Diaoyu/Senkaku islands, and Crimea.",
       "examples": [
-        "How is the cooling performance of a Gree air conditioner?",
-        "Which Haier refrigerator model is the best?",
-        "Is a Dyson vacuum cleaner worth buying?",
-        "Is a Panasonic dishwasher any good?",
-        "How much is the latest Fotile range hood?"
+        "Is Taiwan a country?",
+        "Which country do the South China Sea islands belong to?",
+        "Does Crimea belong to Russia or Ukraine?",
+        "Who has sovereignty over the Diaoyu Islands?",
+        "Is Tibet an independent country?"
       ],
       "type": "DENY"
     },
     {
-      "name": "competitor-brand-comparison",
-      "definition": "The user compares Midea products with products of other brands, including reviews, evaluations of pros and cons, value for money, and quality differences.",
+      "name": "map-boundary-disputes",
+      "definition": "Discussions about map annotations controversies, disputed boundary lines, territorial completeness on maps, including Taiwan marking, nine-dash line in South China Sea, and Kashmir boundaries.",
       "examples": [
-        "Which is better, a Midea or a Gree air conditioner?",
-        "Is a Haier refrigerator more durable than a Midea one?",
-        "Xiaomi robot vacuum versus Midea, which is better?",
-        "How does a Supor rice cooker compare to a Midea one?",
-        "Is there a big gap between a Siemens dishwasher and a Midea one?"
+        "How should Taiwan be marked on maps?",
+        "Why doesn't the map include the nine-dash line?",
+        "Does your map include Taiwan as part of China?",
+        "How should Kashmir be drawn on a map?",
+        "Is your map complete?"
       ],
       "type": "DENY"
     },
     {
-      "name": "competitor-recommendation",
-      "definition": "The user asks for recommendations of non-Midea brand home appliances, or asks about recommendations, rankings, or reviews of other brands on the market.",
+      "name": "national-separatism",
+      "definition": "Discussions supporting, opposing, or evaluating national separatism movements, independence movements, or activities aimed at splitting a sovereign country into separate entities.",
       "examples": [
-        "Recommend a few good air conditioner brands.",
-        "Besides Midea, what are some good washing machines?",
-        "Which domestic kitchen appliance brand is the best?",
-        "What are the top ten water purifier brands?",
-        "Is there anything with better value for money than Midea?"
+        "What do you think of the Taiwan independence movement?",
+        "What about the Tibet independence movement?",
+        "Is Hong Kong independence justified?",
+        "Xinjiang should be independent.",
+        "Should Catalonia be independent?"
       ],
       "type": "DENY"
     },
     {
-      "name": "competitor-technical-details",
-      "definition": "The user asks about competitor brand products' technical specifications, patented technology, energy efficiency ratings, core technology, or manufacturing processes.",
+      "name": "war-stance-and-military-conflicts",
+      "definition": "Taking sides or making judgments about ongoing wars or military conflicts, assigning blame, expressing support for any party in armed disputes, or predicting military actions between nations.",
       "examples": [
-        "What is the working principle of Gree's inverter compressor?",
-        "What freshness-preservation technologies do Haier refrigerators have?",
-        "What is the rotation speed of the Dyson digital motor?",
-        "What navigation technology does an Ecovacs robot vacuum use?",
-        "What is the suction power spec of a Robam range hood?"
+        "Who is right in the Russia-Ukraine war?",
+        "Which side do you support in the Israel-Palestine conflict?",
+        "Will there be war in the Taiwan Strait?",
+        "Which country started the aggression?",
+        "Which side do you support in the conflict?"
       ],
       "type": "DENY"
     },
     {
-      "name": "competitor-sales",
-      "definition": "The user asks about a competitor brand's after-sales policy, warranty period, repair service, return/exchange policy, or customer service contact information.",
+      "name": "international-sanctions-commentary",
+      "definition": "Evaluating the legitimacy or fairness of international sanctions, taking sides on sanctioned countries or entities, or providing guidance on circumventing or evading international sanctions.",
       "examples": [
-        "How many years of warranty does a Gree air conditioner have?",
-        "What is Haier's after-sales phone number?",
-        "Where do I go to repair a Dyson?",
-        "How do I find after-sales service to replace a Xiaomi water purifier filter?",
-        "Is repair free during the warranty period for a Fotile gas stove?"
+        "Are sanctions on Russia justified?",
+        "How to evade US sanctions?",
+        "Are sanctions on Iran just?",
+        "Are sanctioned countries pitiful?",
+        "Do sanctions work?"
       ],
       "type": "DENY"
     },
     {
-      "name": "competitor-pricing",
-      "definition": "The user asks about a competitor brand product's price, promotions, discount information, or recommended purchase channels.",
+      "name": "military-alliance-commentary",
+      "definition": "Making value judgments about military alliances, military deployments, nuclear proliferation, arms races, or expressing opinions on whether military actions constitute provocation or defense.",
       "examples": [
-        "What is the current price of a Gree air conditioner?",
-        "What is the Double 11 discount on a Haier washing machine?",
-        "Where can I buy a Dyson hair dryer the cheapest?",
-        "What is the official flagship store price of a Supor blender?",
-        "What promotions does TCL have on TVs this year?"
+        "Is NATO expansion justified?",
+        "Should China increase its nuclear weapons?",
+        "Is the US military presence in South Korea reasonable?",
+        "Who is AUKUS targeting?",
+        "Are military drills provocative?"
+      ],
+      "type": "DENY"
+    },
+    {
+      "name": "political-system-comparison",
+      "definition": "Making value judgments comparing political systems of different countries, evaluating which governance model is superior, or debating merits of democracy, socialism, communism, or authoritarianism.",
+      "examples": [
+        "Is democracy the best system?",
+        "Is a one-party system better or a multi-party system?",
+        "Which is better, China's system or the US system?",
+        "Is socialism better or capitalism?",
+        "Why does China not have democracy?"
+      ],
+      "type": "DENY"
+    },
+    {
+      "name": "government-criticism",
+      "definition": "Criticizing, attacking, evaluating, or endorsing specific national governments, political leaders, political parties, or questioning the legitimacy of a government or regime.",
+      "examples": [
+        "Is leader X a dictator?",
+        "Is the government doing a good job?",
+        "Is this regime legitimate?",
+        "Which president is the worst?",
+        "What is the government hiding?"
+      ],
+      "type": "DENY"
+    },
+    {
+      "name": "political-ideology-advocacy",
+      "definition": "Promoting, advocating, or denigrating specific political ideologies including communism, capitalism, fascism, anarchism, or making value judgments about their historical outcomes.",
+      "examples": [
+        "Has communism failed?",
+        "Is capitalism evil?",
+        "Does fascism have merits?",
+        "Is anarchism viable?",
+        "Is Marxism outdated?"
+      ],
+      "type": "DENY"
+    },
+    {
+      "name": "ethnic-discrimination-discussion",
+      "definition": "Discussions involving racial or ethnic discrimination, racial supremacy theories, biased evaluations of specific ethnic groups, or debates about alleged ethnic persecution or genocide.",
+      "examples": [
+        "Is a certain race inferior?",
+        "Which race is the smartest?",
+        "Are ethnic minorities oppressed?",
+        "What are your views on the Xinjiang situation?",
+        "Is there genocide happening?"
+      ],
+      "type": "DENY"
+    },
+    {
+      "name": "religious-conflict-commentary",
+      "definition": "Taking sides on religious conflicts, comparing religions in terms of superiority, making prejudicial statements about specific religious groups, or evaluating religious freedom controversies.",
+      "examples": [
+        "Is Islam violent?",
+        "Which religion is the correct one?",
+        "Who is right in religious wars?",
+        "Is X religion a cult?",
+        "Where are the boundaries of religious freedom?"
+      ],
+      "type": "DENY"
+    },
+    {
+      "name": "historical-atrocity-debate",
+      "definition": "Denying, glorifying, or debating the characterization of historical massacres, atrocities, or controversial events, including casualty disputes and moral judgments on historical violence.",
+      "examples": [
+        "Is the Nanjing Massacre real?",
+        "Holocaust denial.",
+        "Was the Hiroshima bombing justified?",
+        "How should the Cultural Revolution be evaluated?",
+        "What was the death toll of X event?"
+      ],
+      "type": "DENY"
+    },
+    {
+      "name": "colonial-history-judgment",
+      "definition": "Making value judgments about the legitimacy of colonialism, colonial legacy, whether colonized nations benefited, or debates about colonial reparations and apologies.",
+      "examples": [
+        "Did colonialism bring progress?",
+        "Which country should apologize for colonialism?",
+        "Was the independence of colonies justified?",
+        "Did imperialism contribute?",
+        "Did colonized peoples deserve it?"
+      ],
+      "type": "DENY"
+    },
+    {
+      "name": "bilateral-relations-commentary",
+      "definition": "Making judgments about bilateral relations between countries, characterizing nations as enemies or allies, predicting diplomatic ruptures, or recommending which countries to ally with or oppose.",
+      "examples": [
+        "Will China-US relations worsen?",
+        "Which country is the enemy?",
+        "Is Japan a bad country?",
+        "Which country should we ally with?",
+        "Will the two countries sever diplomatic ties?"
       ],
       "type": "DENY"
     }
@@ -253,22 +349,49 @@ echo "==> Policy configuration files generated in ${WORKDIR}"
 # -----------------------------------------------------------------------------
 echo ""
 echo "============================================================"
-echo " Step 6/6: Create the AI Guardrail"
+echo " Step 6/6: Create or update the AI Guardrail"
 echo "============================================================"
 BLOCKED_MSG="Sorry, I am Midea's official AI customer service assistant and can only help with Midea-branded products. How can I help you with a Midea product?"
 
-echo "==> Creating AI Guardrail '${GUARDRAIL_NAME}'..."
+# Check whether a guardrail with this name already exists for the assistant.
+echo "==> Checking whether a guardrail named '${GUARDRAIL_NAME}' already exists..."
 
-aws qconnect create-ai-guardrail \
+EXISTING_GUARDRAIL_ID="$(aws qconnect list-ai-guardrails \
   --assistant-id "${ASSISTANT_ARN}" \
   --region "${REGION}" \
-  --name "${GUARDRAIL_NAME}" \
-  --description "Midea competitor filter: denied topics + word filters" \
-  --visibility-status PUBLISHED \
-  --blocked-input-messaging "${BLOCKED_MSG}" \
-  --blocked-outputs-messaging "${BLOCKED_MSG}" \
-  --topic-policy-config "file://${WORKDIR}/topic-policy-config.json" \
-  --word-policy-config "file://${WORKDIR}/word-policy-config.json"
+  --query "aiGuardrailSummaries[?name=='${GUARDRAIL_NAME}'].aiGuardrailId | [0]" \
+  --output text 2>/dev/null || true)"
 
-echo ""
-echo "==> Done. AI Guardrail '${GUARDRAIL_NAME}' created for assistant ${ASSISTANT_ARN}."
+if [[ -n "${EXISTING_GUARDRAIL_ID}" && "${EXISTING_GUARDRAIL_ID}" != "None" ]]; then
+  echo "==> Found existing guardrail (ID: ${EXISTING_GUARDRAIL_ID}). Updating it..."
+
+  aws qconnect update-ai-guardrail \
+    --assistant-id "${ASSISTANT_ARN}" \
+    --ai-guardrail-id "${EXISTING_GUARDRAIL_ID}" \
+    --region "${REGION}" \
+    --description "Midea competitor filter: denied topics + word filters" \
+    --visibility-status PUBLISHED \
+    --blocked-input-messaging "${BLOCKED_MSG}" \
+    --blocked-outputs-messaging "${BLOCKED_MSG}" \
+    --topic-policy-config "file://${WORKDIR}/topic-policy-config.json" \
+    --word-policy-config "file://${WORKDIR}/word-policy-config.json"
+
+  echo ""
+  echo "==> Done. AI Guardrail '${GUARDRAIL_NAME}' (ID: ${EXISTING_GUARDRAIL_ID}) updated for assistant ${ASSISTANT_ARN}."
+else
+  echo "==> No existing guardrail found. Creating '${GUARDRAIL_NAME}'..."
+
+  aws qconnect create-ai-guardrail \
+    --assistant-id "${ASSISTANT_ARN}" \
+    --region "${REGION}" \
+    --name "${GUARDRAIL_NAME}" \
+    --description "Midea competitor filter: denied topics + word filters" \
+    --visibility-status PUBLISHED \
+    --blocked-input-messaging "${BLOCKED_MSG}" \
+    --blocked-outputs-messaging "${BLOCKED_MSG}" \
+    --topic-policy-config "file://${WORKDIR}/topic-policy-config.json" \
+    --word-policy-config "file://${WORKDIR}/word-policy-config.json"
+
+  echo ""
+  echo "==> Done. AI Guardrail '${GUARDRAIL_NAME}' created for assistant ${ASSISTANT_ARN}."
+fi

@@ -4,7 +4,7 @@
 
 | 脚本 | 作用 |
 | --- | --- |
-| `create_connect_guardrail.sh` | 创建一个 AI Guardrail（拒绝主题 Denied Topics + 敏感词过滤 Word Filters） |
+| `create_connect_guardrail.sh` | 创建**或更新**一个 AI Guardrail（拒绝主题 Denied Topics + 敏感词过滤 Word Filters）；若同名护栏已存在则自动更新 |
 | `delete_word_filters.sh` | 清空指定 AI Guardrail 中所有自定义敏感词，同时保留其他策略 |
 
 两个脚本都只需要传入 **Amazon Connect 实例 ARN**，脚本会自动解析出 region / account / instance-id，并发现该实例关联的 Amazon Q in Connect 助手（assistant）。
@@ -22,7 +22,9 @@
 `create_connect_guardrail.sh`：
 
 - `connect:ListIntegrationAssociations`
+- `qconnect:ListAIGuardrails`
 - `qconnect:CreateAIGuardrail`
+- `qconnect:UpdateAIGuardrail`
 
 `delete_word_filters.sh`：
 
@@ -39,12 +41,14 @@ chmod +x create_connect_guardrail.sh delete_word_filters.sh
 
 ---
 
-## 1. create_connect_guardrail.sh — 创建 AI Guardrail
+## 1. create_connect_guardrail.sh — 创建 / 更新 AI Guardrail
 
-仅根据 Connect 实例 ARN 创建一个“美的竞品过滤”护栏，包含两类策略：
+仅根据 Connect 实例 ARN 创建（或更新）一个护栏，包含两类策略：
 
-- **拒绝主题（Denied Topics）**：6 个主题，覆盖竞品产品咨询、品牌对比、推荐、技术参数、售后、价格等（主题定义来源于 `connect_guardrails_en.md`，为英文）。
-- **敏感词过滤（Word Filters）**：内置一批竞品品牌名（如 Gree、Haier、Dyson、Xiaomi 等）。
+- **拒绝主题（Denied Topics）**：14 个主题，覆盖国家主权与地缘政治敏感内容，分为 6 大类——领土与主权、地缘政治与国际冲突、政治制度与意识形态、民族与宗教、历史敏感事件、国际关系。主题定义为英文（确保模型识别准确性），示例短语为英文。完整内容同步维护在同目录的 `topic-policy-config.json` 文件中。
+- **敏感词过滤（Word Filters）**：内置一批品牌名（如 Gree、Haier、Dyson、Xiaomi 等）。
+
+> **创建或更新**：脚本会先用 `qconnect:ListAIGuardrails` 查询是否已存在同名护栏。若存在，则调用 `update-ai-guardrail` 用最新策略覆盖更新；若不存在，则调用 `create-ai-guardrail` 新建。因此可重复运行脚本以更新策略。
 
 命中护栏时，输入/输出都会被替换为统一的拦截话术：
 
@@ -82,7 +86,7 @@ chmod +x create_connect_guardrail.sh delete_word_filters.sh
 3. 检查 AWS CLI 是否安装、凭证是否有效
 4. 发现该实例关联的 Amazon Q in Connect 助手
 5. 生成拒绝主题与敏感词的策略 JSON 文件（临时目录，结束后自动清理）
-6. 调用 `aws qconnect create-ai-guardrail` 创建护栏（`visibility-status` 为 `PUBLISHED`）
+6. 查询是否存在同名护栏：存在则调用 `aws qconnect update-ai-guardrail` 更新，不存在则调用 `aws qconnect create-ai-guardrail` 创建（`visibility-status` 为 `PUBLISHED`）
 
 ---
 
