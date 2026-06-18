@@ -1,9 +1,22 @@
 #!/usr/bin/env bash
 #
-# 在 Bedrock 中创建/更新 Guardrail 并导入 denied topics（拒绝主题）。
-# denied topics 内容来自 prompt_en.txt / prompt.txt 的 <restrictions> 部分，
-# 已内联在本脚本中（不再依赖外部 JSON 文件）。
-# API 参考: https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-denied-topics.html
+# create_bedrock_guardrail_v2.sh
+# ------------------------------------------------------------------------------
+# 在 Bedrock 中创建/更新生产就绪的 Guardrail（CLASSIC tier），并导入 denied topics。
+# 由 create_and_test_bedrock_guardrail_classic_good.py 转换而来（仅保留创建逻辑，
+# 去掉了测试部分）。
+#
+# 该配置经过人工调优并验证，满足 Midea denied-topics 需求，用于 Amazon Connect
+# （CLASSIC 层级，Amazon Connect AI Guardrail 仅支持 CLASSIC）。
+#
+# 相比原始 denied topics，做了以下调整以抑制真实世界的误报
+# （例如 "lam"、"xietian" 这类很短的拼音/姓名输入被错误拦截）:
+#   1. 移除整个 `ethnic-discrimination-discussion` 主题。
+#   2. `territorial-sovereignty-disputes` 定义不再提及 Taiwan / Tibet，删除相应示例。
+#   3. `national-separatism` 定义不再提及 Taiwan, Tibet, Xinjiang，删除相应三个示例。
+#   4. `religious-conflict-commentary` 删除两个会误报的示例
+#      （"Is Islam violent?" / "Is X religion a cult?"）。
+#   其余 10 个主题与 V2 基线保持一致。
 #
 # 行为:
 #   - 默认按名字查找是否已存在同名 guardrail:
@@ -13,9 +26,9 @@
 #   - RECREATE=1                 -> 先删除同名 guardrail，等名字释放后再 create
 #
 # 用法:
-#   ./create_bedrock_guardrail.sh                 # 没有就建，有就更新（推荐）
-#   GUARDRAIL_ID=xxx ./create_bedrock_guardrail.sh    # 更新指定 id
-#   RECREATE=1 ./create_bedrock_guardrail.sh      # 删除重建
+#   ./create_bedrock_guardrail_v2.sh                    # 没有就建，有就更新（推荐）
+#   GUARDRAIL_ID=xxx ./create_bedrock_guardrail_v2.sh   # 更新指定 id
+#   RECREATE=1 ./create_bedrock_guardrail_v2.sh         # 删除重建
 #
 set -euo pipefail
 
@@ -28,79 +41,71 @@ if [[ -z "${REGION}" ]]; then
   echo "ERROR: 未检测到 AWS region。请设置 AWS_REGION，或运行 'aws configure' 设置 region，或显式指定 REGION=xxx。" >&2
   exit 1
 fi
-NAME="${NAME:-midea-aftersales-voice-agent-guardrail}"
-DESCRIPTION="Denied topics derived from the after-sales voice agent prompt restrictions."
+NAME="${NAME:-Midea-Connect-Denied-Topics-Classic-Good}"
+DESCRIPTION="Midea Connect denied-topics guardrail (CLASSIC tier, hand-tuned for low FP)."
 
-BLOCKED_INPUT="抱歉，我无法回答这个问题。我们继续处理您的售后维修需求好吗？"
-BLOCKED_OUTPUT="抱歉，我无法提供这部分信息。我们继续处理您的售后维修需求好吗？"
+BLOCKED_INPUT="Sorry, I am Midea's official AI customer service assistant and can only help with Midea-branded products. How can I help you with a Midea product?"
+BLOCKED_OUTPUT="${BLOCKED_INPUT}"
 
-# 拒绝主题配置（内联）。
+# 拒绝主题配置（内联）。CLASSIC tier 通过 tierConfig 指定。
 read -r -d '' TOPIC_POLICY_CONFIG <<'JSON' || true
 {
   "topicsConfig": [
     {
       "name": "territorial-sovereignty-disputes",
-      "definition": "Discussions about territorial ownership disputes, sovereignty positions, or status of disputed regions such as Taiwan, South China Sea islands, Diaoyu/Senkaku islands, and Crimea.",
+      "definition": "Asking the assistant to declare or judge which country owns a disputed region (HK, S.China Sea, Crimea, Kashmir). Not customer questions about shipping, warranty, or purchase location.",
       "examples": [
-        "Is Taiwan a country?",
         "Which country do the South China Sea islands belong to?",
         "Does Crimea belong to Russia or Ukraine?",
-        "Who has sovereignty over the Diaoyu Islands?",
-        "Is Tibet an independent country?"
+        "Who has sovereignty over the Diaoyu Islands?"
       ],
       "type": "DENY"
     },
     {
       "name": "map-boundary-disputes",
-      "definition": "Discussions about map annotations controversies, disputed boundary lines, territorial completeness on maps, including Taiwan marking, nine-dash line in South China Sea, and Kashmir boundaries.",
+      "definition": "Asking how disputed borders should be drawn or labeled on a map (Taiwan, nine-dash line, Kashmir, Crimea). Not product manuals or service-coverage maps.",
       "examples": [
         "How should Taiwan be marked on maps?",
         "Why doesn't the map include the nine-dash line?",
         "Does your map include Taiwan as part of China?",
-        "How should Kashmir be drawn on a map?",
-        "Is your map complete?"
+        "How should Kashmir be drawn on a map?"
       ],
       "type": "DENY"
     },
     {
       "name": "national-separatism",
-      "definition": "Discussions supporting, opposing, or evaluating national separatism movements, independence movements, or activities aimed at splitting a sovereign country into separate entities.",
+      "definition": "Asking the assistant to support, oppose, or judge separatist/independence movements (HK, Catalonia). Not product/shipping mentions of these regions.",
       "examples": [
-        "What do you think of the Taiwan independence movement?",
-        "What about the Tibet independence movement?",
         "Is Hong Kong independence justified?",
-        "Xinjiang should be independent.",
         "Should Catalonia be independent?"
       ],
       "type": "DENY"
     },
     {
       "name": "war-stance-and-military-conflicts",
-      "definition": "Taking sides or making judgments about ongoing wars or military conflicts, assigning blame, expressing support for any party in armed disputes, or predicting military actions between nations.",
+      "definition": "Asking the assistant to take sides, assign blame, predict, or morally judge wars or military conflicts (Russia-Ukraine, Israel-Palestine, Taiwan Strait). Not product questions about those regions.",
       "examples": [
         "Who is right in the Russia-Ukraine war?",
         "Which side do you support in the Israel-Palestine conflict?",
         "Will there be war in the Taiwan Strait?",
-        "Which country started the aggression?",
-        "Which side do you support in the conflict?"
+        "Which country started the aggression?"
       ],
       "type": "DENY"
     },
     {
       "name": "international-sanctions-commentary",
-      "definition": "Evaluating the legitimacy or fairness of international sanctions, taking sides on sanctioned countries or entities, or providing guidance on circumventing or evading international sanctions.",
+      "definition": "Asking the assistant to judge the legitimacy of international sanctions, take sides, or advise on evading sanctions. Not logistics or shipping/service availability questions.",
       "examples": [
         "Are sanctions on Russia justified?",
         "How to evade US sanctions?",
         "Are sanctions on Iran just?",
-        "Are sanctioned countries pitiful?",
         "Do sanctions work?"
       ],
       "type": "DENY"
     },
     {
       "name": "military-alliance-commentary",
-      "definition": "Making value judgments about military alliances, military deployments, nuclear proliferation, arms races, or expressing opinions on whether military actions constitute provocation or defense.",
+      "definition": "Asking the assistant to value-judge military alliances, deployments, nuclear weapons, arms races, or whether military actions are provocative or defensive (NATO, AUKUS, US bases).",
       "examples": [
         "Is NATO expansion justified?",
         "Should China increase its nuclear weapons?",
@@ -112,7 +117,7 @@ read -r -d '' TOPIC_POLICY_CONFIG <<'JSON' || true
     },
     {
       "name": "political-system-comparison",
-      "definition": "Making value judgments comparing political systems of different countries, evaluating which governance model is superior, or debating merits of democracy, socialism, communism, or authoritarianism.",
+      "definition": "Asking the assistant to rank or judge the superiority of political systems (democracy vs one-party rule, socialism vs capitalism, authoritarianism).",
       "examples": [
         "Is democracy the best system?",
         "Is a one-party system better or a multi-party system?",
@@ -124,7 +129,7 @@ read -r -d '' TOPIC_POLICY_CONFIG <<'JSON' || true
     },
     {
       "name": "government-criticism",
-      "definition": "Criticizing, attacking, evaluating, or endorsing specific national governments, political leaders, political parties, or questioning the legitimacy of a government or regime.",
+      "definition": "Asking the assistant to criticize, attack, or endorse a national government, political leader, or party, or to question regime legitimacy. Not Midea's own company policies or service procedures.",
       "examples": [
         "Is leader X a dictator?",
         "Is the government doing a good job?",
@@ -136,7 +141,7 @@ read -r -d '' TOPIC_POLICY_CONFIG <<'JSON' || true
     },
     {
       "name": "political-ideology-advocacy",
-      "definition": "Promoting, advocating, or denigrating specific political ideologies including communism, capitalism, fascism, anarchism, or making value judgments about their historical outcomes.",
+      "definition": "Asking the assistant to promote, denounce, or value-judge political ideologies (communism, capitalism, fascism, anarchism, Marxism) or their historical track record.",
       "examples": [
         "Has communism failed?",
         "Is capitalism evil?",
@@ -147,44 +152,29 @@ read -r -d '' TOPIC_POLICY_CONFIG <<'JSON' || true
       "type": "DENY"
     },
     {
-      "name": "ethnic-discrimination-discussion",
-      "definition": "Discussions involving racial or ethnic discrimination, racial supremacy theories, biased evaluations of specific ethnic groups, or debates about alleged ethnic persecution or genocide.",
-      "examples": [
-        "Is a certain race inferior?",
-        "Which race is the smartest?",
-        "Are ethnic minorities oppressed?",
-        "What are your views on the Xinjiang situation?",
-        "Is there genocide happening?"
-      ],
-      "type": "DENY"
-    },
-    {
       "name": "religious-conflict-commentary",
-      "definition": "Taking sides on religious conflicts, comparing religions in terms of superiority, making prejudicial statements about specific religious groups, or evaluating religious freedom controversies.",
+      "definition": "Asking the assistant to take sides on religious conflicts, rank religions, make prejudicial statements about a religious group, or judge religious-freedom issues.",
       "examples": [
-        "Is Islam violent?",
         "Which religion is the correct one?",
         "Who is right in religious wars?",
-        "Is X religion a cult?",
         "Where are the boundaries of religious freedom?"
       ],
       "type": "DENY"
     },
     {
       "name": "historical-atrocity-debate",
-      "definition": "Denying, glorifying, or debating the characterization of historical massacres, atrocities, or controversial events, including casualty disputes and moral judgments on historical violence.",
+      "definition": "Asking the assistant to deny, glorify, or debate the framing or casualty count of historical massacres/atrocities (Nanjing, Holocaust, Hiroshima, Cultural Revolution).",
       "examples": [
         "Is the Nanjing Massacre real?",
         "Holocaust denial.",
         "Was the Hiroshima bombing justified?",
-        "How should the Cultural Revolution be evaluated?",
-        "What was the death toll of X event?"
+        "How should the Cultural Revolution be evaluated?"
       ],
       "type": "DENY"
     },
     {
       "name": "colonial-history-judgment",
-      "definition": "Making value judgments about the legitimacy of colonialism, colonial legacy, whether colonized nations benefited, or debates about colonial reparations and apologies.",
+      "definition": "Asking the assistant to judge whether colonialism was beneficial/justified, who should apologize, or whether colonized peoples deserved their fate or independence.",
       "examples": [
         "Did colonialism bring progress?",
         "Which country should apologize for colonialism?",
@@ -196,7 +186,7 @@ read -r -d '' TOPIC_POLICY_CONFIG <<'JSON' || true
     },
     {
       "name": "bilateral-relations-commentary",
-      "definition": "Making judgments about bilateral relations between countries, characterizing nations as enemies or allies, predicting diplomatic ruptures, or recommending which countries to ally with or oppose.",
+      "definition": "Asking the assistant to characterize country relations as friendly/hostile, label nations as enemies/allies, predict diplomatic ruptures, or pick alliances. Not shipping/service questions.",
       "examples": [
         "Will China-US relations worsen?",
         "Which country is the enemy?",
@@ -285,4 +275,5 @@ fi
 
 # 创建/更新后，发布一个版本以便在运行时引用:
 #   aws bedrock create-guardrail-version --region "${REGION}" \
-#     --guardrail-identifier <GUARDRAIL_ID> --description "v1 denied topics"
+#     --guardrail-identifier <GUARDRAIL_ID> --description "v1 GA"
+# 然后把 Amazon Connect AI Guardrail 集成指向该版本。
